@@ -13,10 +13,11 @@
   },
   "scripts": {
     "start:dev": "npx nodemon",
-    "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/index.js"
+    "build": "rimraf ./dist && tsc",
+    "start": "npm run build && node dist/main.js"
   },
   "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
     "@types/request": "^2.48.12",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.5",
