@@ -13,6 +13,9 @@ export type RequestToPayInput = CreateAccessInput & {
     referenceId:string
     version?:'v1_0'|'v2_0'
 }
+export type RequestGetUserInfoInput =CreateAccessInput & {
+    accountHolderMSISDN:string,
+}
 export type RequestGetAccountBalanceInput =CreateAccessInput &{
     currency?:string;
 }
