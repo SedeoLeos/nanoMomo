@@ -3,6 +3,11 @@ export type PlayloadAccessToken = {
   token_type: string;
   expires_in: number;
 };
+export type PlayloadOauth2 = PlayloadAccessToken & {
+  scope: string;
+  refresh_token: string;
+  refresh_token_expired_in: number;
+};
 export type Payer = {
   partyIdType: string;
   partyId: string;
@@ -63,4 +68,9 @@ export type PlayloadUserInfo = {
   locale: string;
   gender: string;
   status: string;
+};
+export type PlayloadBcauthorizeResponse = {
+  auth_req_id: string;
+  interval: string;
+  expires_in: string;
 };

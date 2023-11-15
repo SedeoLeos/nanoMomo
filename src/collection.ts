@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PlayloadAccessToken, PlayloadRequestToPayResult } from "./type";
+import { PlayloadAccessToken, PlayloadRequestToPayResult,PlayloadBcauthorizeResponse,PlayloadOauth2,PlayloadUserinfoWithConsent } from "./type";
 import {
   BodyRequestTopayInput,
   BodyRequesttoPayDeliveryNotificationInput,
@@ -9,7 +9,12 @@ import {
   RequestToPayInput,
   RequesttoPayDeliveryNotificationInput,
   ValidateAccountHolderStatusInput,
+  BcAuthorizeInput,
+  BodyOauth2Token,
+  BodyBcAuthorize,
+  BodyInvoiceInput
 } from "./input";
+import querystring from 'querystring';
 
 export class Colloction {
   private headers: any = {};
@@ -46,8 +51,51 @@ export class Colloction {
     }
     return null;
   }
-  async BcAuthorize() {
+  async BcAuthorize(data:BcAuthorizeInput,body:BodyBcAuthorize) {
     const url = this.url + "v1_0/bc-authorize";
+    const { api_key, user_api,} = data;
+    const auth = await this.createAccessToken({
+      api_key,
+      user_api,
+    });
+    if (!auth) return null;
+    const headers = this.headers;
+    headers["X-Callback-Url"] = this.callback;
+    headers['Content-Type']='application/x-www-form-urlencoded'
+    headers["Authorization"] = "Bearer" + auth.access_token;
+    headers["X-Callback-Url"] = this.callback;
+    headers['Content-Type']='application/x-www-form-urlencoded'
+    try {
+      const response = await axios.post<PlayloadBcauthorizeResponse>(url,querystring.stringify(body.toObject()),{headers})
+      if(response.status ==200){
+        return response.data
+      }
+    } catch (error) {
+      
+    }
+    return null;
+  } 
+  async CreateOauth2Token(data:BcAuthorizeInput,body:BodyOauth2Token){
+    const url = this.url + "v1_0/oauth2/token";
+    const { api_key, user_api,} = data;
+    const auth = await this.createAccessToken({
+      api_key,
+      user_api,
+    });
+    if (!auth) return null;
+    const headers = this.headers;
+    headers['Content-Type']='application/x-www-form-urlencoded'
+    headers["Authorization"] = "Bearer" + auth.access_token;
+    headers['Content-Type']='application/x-www-form-urlencoded'
+    try {
+      const response =await axios.post<PlayloadOauth2>(url,querystring.stringify(body.toObject()),{headers})
+      if( response.status==200){
+        return response.data;
+      }
+    } catch (error) {
+      
+    }
+    return null;
   }
   async requestTopay(data: RequestToPayInput, body: BodyRequestTopayInput) {
     const url = this.url + "/v1_0/requesttopay";
@@ -59,6 +107,8 @@ export class Colloction {
     if (!auth) return null;
     const headers = this.headers;
     headers["X-Reference-Id"] = referenceId;
+    headers["X-Callback-Url"] = this.callback;
+    headers['Content-Type']='application/x-www-form-urlencoded'
     headers["Authorization"] = "Bearer" + auth.access_token;
     try {
       const response = await axios.post(url, body, { headers });
@@ -132,12 +182,86 @@ export class Colloction {
     return null;
   }
   async GetBasicUserinfo() {}
-  getInvoiceStatus() {}
+  async createInvoiceStatus(data:RequestToPayInput,body:BodyInvoiceInput) {
+    const url = this.url +'v2_0/invoice';
+    const { referenceId, user_api, api_key } = data;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers['X-Reference-Id'] = referenceId
+    headers["Authorization"] = "Bearer " + token.access_token;
+    try {
+      const response = await axios.post(url,body,{headers});
+      if(response.status==202){
+        return true
+      }
+    } catch (error) {
+      
+    }
+    return false;
+    
+  }
+  async getInvoiceStatus(data:RequestToPayInput) {
+    const { referenceId, user_api, api_key } = data;
+    const url = this.url +`v2_0/invoice/${referenceId}`;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer " + token.access_token;
+    try {
+      const response = await axios.get(url,{headers});
+      if(response.status==200){
+        return response.data;
+      }
+    } catch (error) {
+      
+    }
+    return null;
+  }
+  async cancelInvoice(data:RequestToPayInput,body:{externalId:string}){
+    const { referenceId, user_api, api_key } = data;
+    const url = this.url +`v2_0/invoice/${referenceId}`;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer " + token.access_token;
+    try {
+      const response = await axios.delete(url,{headers});
+      if(response.status==200){
+        return response.data;
+      }
+    } catch (error) {
+      
+    }
+    return null;
+  }
   getPaymentStatus() {}
   getPreApprovalStatus() {}
-  getUserInfoWithConsent() {
+  async getUserInfoWithConsent(data:{
+    Authorization:string,
+  }) {
+    const {Authorization}=data;
     const url = this.url + "oauth2/v1_0/userinfo";
-
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer" + Authorization;
+    try {
+      const response = await axios.get<PlayloadUserinfoWithConsent>(url,{headers})
+      if(response.status==200){
+        return response.data;
+      }
+    } catch (error) {
+      
+    }
+    return null
     // PlayloadUserinfoWithConsent
   }
   async requestToWithdraw(
