@@ -1,5 +1,5 @@
 import axios from "axios";
-import { PlayloadAccessToken, PlayloadRequestToPayResult,PlayloadBcauthorizeResponse,PlayloadOauth2,PlayloadUserinfoWithConsent } from "./type";
+import { PlayloadAccessToken, PlayloadRequestToPayResult,PlayloadBcauthorizeResponse,PlayloadOauth2,PlayloadUserinfoWithConsent, PreApprovalResult, PaymentResult, PlayloadUserInfo } from "./type";
 import {
   BodyRequestTopayInput,
   BodyRequesttoPayDeliveryNotificationInput,
@@ -12,7 +12,8 @@ import {
   BcAuthorizeInput,
   BodyOauth2Token,
   BodyBcAuthorize,
-  BodyInvoiceInput
+  BodyInvoiceInput,
+  BodyPreApproval
 } from "./input";
 import querystring from 'querystring';
 
@@ -51,7 +52,7 @@ export class Colloction {
     }
     return null;
   }
-  async BcAuthorize(data:BcAuthorizeInput,body:BodyBcAuthorize) {
+  async bcAuthorize(data:BcAuthorizeInput,body:BodyBcAuthorize) {
     const url = this.url + "v1_0/bc-authorize";
     const { api_key, user_api,} = data;
     const auth = await this.createAccessToken({
@@ -75,7 +76,7 @@ export class Colloction {
     }
     return null;
   } 
-  async CreateOauth2Token(data:BcAuthorizeInput,body:BodyOauth2Token){
+  async createOauth2Token(data:BcAuthorizeInput,body:BodyOauth2Token){
     const url = this.url + "v1_0/oauth2/token";
     const { api_key, user_api,} = data;
     const auth = await this.createAccessToken({
@@ -132,8 +133,10 @@ export class Colloction {
     headers["Authorization"] = "Bearer" + auth.access_token;
 
     try {
-      const response = await axios.get(url, { headers });
+      const response = await axios.get<PlayloadUserInfo>(url, { headers });
+      if(response.status==200) return response.data;
     } catch (e) {}
+    return null;
   }
   async requesttoPayDeliveryNotification(
     data: RequesttoPayDeliveryNotificationInput,
@@ -181,7 +184,6 @@ export class Colloction {
     } catch (e) {}
     return null;
   }
-  async GetBasicUserinfo() {}
   async createInvoiceStatus(data:RequestToPayInput,body:BodyInvoiceInput) {
     const url = this.url +'v2_0/invoice';
     const { referenceId, user_api, api_key } = data;
@@ -244,8 +246,68 @@ export class Colloction {
     }
     return null;
   }
-  getPaymentStatus() {}
-  getPreApprovalStatus() {}
+  async preApproval(data:RequestToPayInput,body:BodyPreApproval){
+    const {api_key,user_api,referenceId} = data;
+    const url = this.url +`v2_0/preapproval`;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["X-Reference-Id"] = referenceId;
+    headers['X-Callback-Url'] = this.callback;
+    try {
+      const response = await axios.post(url,body,{headers});
+      if(response.status==202)return true;
+    } catch (error) {
+      
+    }
+    return false
+
+  }
+  
+  async getPaymentStatus(data:RequestToPayInput) {
+    const {api_key,user_api,referenceId} = data;
+    const url = this.url +`v2_0/payment/${referenceId}`;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer " + token.access_token;
+    headers['X-Callback-Url'] = this.callback;
+
+    try {
+      const response = await axios.get<PaymentResult>(url,{headers});
+      if(response.status==200)return response.data;
+    } catch (error) {
+      
+    }
+    return null
+  }
+  async getPreApprovalStatus(data:RequestToPayInput) {
+    const {api_key,user_api,referenceId} = data;
+    const url = this.url +`v2_0/preapproval/${referenceId}`;
+    const token = await this.createAccessToken({
+      user_api,
+      api_key,
+    });
+    if (!token) return null;
+    const headers = this.headers;
+    headers["Authorization"] = "Bearer " + token.access_token;
+    
+    headers['X-Callback-Url'] = this.callback;
+    try {
+      const response = await axios.get<PreApprovalResult>(url,{headers});
+      if(response.status==200)return response.data;
+    } catch (error) {
+      
+    }
+    return null;
+  }
   async getUserInfoWithConsent(data:{
     Authorization:string,
   }) {

@@ -80,3 +80,9 @@ export class BodyOauth2Token  {
   }
 
 }
+export type BodyPreApproval = {
+  payer:Payer,
+  payerCurrency:string,
+  payerMessage:string,
+  validityTime:number
+}

@@ -57,7 +57,7 @@ export type PlayloadRequestTopay = {
   amount: string;
   currency: string;
   externalId: string;
-  paye: Payer;
+  payer: Payer;
   payerMessage: string;
   payeeNote: string;
 };
@@ -74,3 +74,15 @@ export type PlayloadBcauthorizeResponse = {
   interval: string;
   expires_in: string;
 };
+export type PreApprovalResult =Pick<PlayloadRequestTopay,'payer'|'payerMessage'> & {
+  payerCurrency:string,
+  status:string,
+  expirationDateTime:number,
+  reason:ErrorReason
+}
+export type PaymentResult = {
+  referenceId:string,
+  status:string,
+  financialTransactionId:string,
+  reason:ErrorReason
+}
