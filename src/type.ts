@@ -21,7 +21,7 @@ export type PlayloadRequestToPayResult = {
   currency: string;
   financialTransactionId: string;
   externalid: string;
-  payer: Payer;
+  ppayee: Payer;
   payerMessage: string;
   payeeNote: string;
   status: string;
@@ -53,6 +53,29 @@ export type PlayloadUserinfoWithConsent = {
   identification_type: string;
   identification_value: string;
 };
+export type PlayloadCashTransfer = {
+  payerGender: string;
+  payerMsisdn: string;
+  payerEmail: string;
+  payerLanguageCode: string;
+  payerSurName: string;
+  payerFirstName: string;
+  payerIdentity: string;
+  payerIdentificationNumber: string;
+  payerIdentificationType: string;
+  payeeNote: string;
+  payerMessage: string;
+  originalCurrency: string;
+  originalAmount: string;
+  orginatingCountry: string;
+  externalId: string;
+  payee: Payer;
+  currency: string;
+  amount: string;
+  reason: string;
+  status: string;
+  financialTransactionId: string;
+};
 export type PlayloadRequestTopay = {
   amount: string;
   currency: string;
@@ -74,15 +97,18 @@ export type PlayloadBcauthorizeResponse = {
   interval: string;
   expires_in: string;
 };
-export type PreApprovalResult =Pick<PlayloadRequestTopay,'payer'|'payerMessage'> & {
-  payerCurrency:string,
-  status:string,
-  expirationDateTime:number,
-  reason:ErrorReason
-}
+export type PreApprovalResult = Pick<
+  PlayloadRequestTopay,
+  "payer" | "payerMessage"
+> & {
+  payerCurrency: string;
+  status: string;
+  expirationDateTime: number;
+  reason: ErrorReason;
+};
 export type PaymentResult = {
-  referenceId:string,
-  status:string,
-  financialTransactionId:string,
-  reason:ErrorReason
-}
+  referenceId: string;
+  status: string;
+  financialTransactionId: string;
+  reason: ErrorReason;
+};

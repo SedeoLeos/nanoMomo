@@ -16,17 +16,22 @@ async function main() {
     return null;
   }
   console.log(apikey, userApi);
-  const collection = new Colloction(
-    "https://sandbox.momodeveloper.mtn.com/collection",
-    subriction_id,
-    "sandbox",
-    callbackhost
-  );
+  const collection = new Colloction({
+    env:'sandbox',
+    baseUrl:'https://sandbox.momodeveloper.mtn.com/collection',
+    subscriptionId:'b0f5afe7e38f499383c49cb472ba60b9',
+  });
   const result = await collection.createAccessToken({
     api_key: apikey.apikey,
     user_api: userApi.userApi,
   });
-  console.log(result);
+
+  const basicUser = await collection.getBasicUserInfo({
+    user_api: userApi.userApi,
+    api_key: apikey.apikey,
+    accountHolderMSISDN: "242066900110"
+  });
+  console.log(basicUser)
   // await provi.createApikey()
 }
-// main();
+main();

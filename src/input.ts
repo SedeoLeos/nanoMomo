@@ -1,10 +1,10 @@
 import { Payer } from "./type";
-
 export type CreateAccessInput = {
-    
-        user_api: string;
-        api_key: string;  
+  user_api: string;
+  api_key: string;
+  callback?:string; 
 }
+
 export type ValidateAccountHolderStatusInput = CreateAccessInput & {
     accountHolderIdType: string;
     accountHolderId: string;
@@ -13,6 +13,8 @@ export type RequestToPayInput = CreateAccessInput & {
     referenceId:string
     version?:'v1_0'|'v2_0'
 }
+export type RequestToDepotInput  = RequestToPayInput;
+
 export type RequestGetUserInfoInput =CreateAccessInput & {
     accountHolderMSISDN:string,
 }
@@ -28,6 +30,10 @@ export type BodyRequestTopayInput= {
     payerMessage: string , 
     payeeNote: string 
 
+}
+export type BodyRequestToDepotInput = BodyRequestTopayInput;
+export type BodyRequestToRefund = Omit<BodyRequestTopayInput,'payee'> & {
+  BodyRequestTopayInput:string
 }
 export type BodyInvoiceInput =Omit<BodyRequestTopayInput,'payerMessage'|'payeeNote'> & {
     validityDuration:string,

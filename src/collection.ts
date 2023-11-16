@@ -16,90 +16,16 @@ import {
   BodyPreApproval
 } from "./input";
 import querystring from 'querystring';
+import { BaseService } from "./base/base.service";
 
-export class Colloction {
-  private headers: any = {};
-  constructor(
-    private url: string,
-    subricription_id: string,
-    env: string,
-    private callback: string
-  ) {
-    this.url = "https://sandbox.momodeveloper.mtn.com/collection";
-    this.headers["Ocp-Apim-Subscription-Key"] = subricription_id;
-    this.headers["X-Target-Environment"] = env;
-  }
+export class Colloction extends BaseService {
+  
 
-  async createAccessToken(data: CreateAccessInput) {
-    const { user_api, api_key } = data;
-    try {
-      const authorisation =
-        "Basic " + Buffer.from(user_api + ":" + api_key).toString("base64");
-      const headers = this.headers;
-      headers["Authorization"] = authorisation;
-      const response = await axios.post<PlayloadAccessToken>(
-        `${this.url}/token/`,
-        {},
-        { headers }
-      );
-      console.log(response.data);
-      if (response.status == 201) {
-        return response.data;
-      }
-    } catch (e: any) {
-      console.log(e.response.status);
-      // console.log(e.response)
-    }
-    return null;
-  }
-  async bcAuthorize(data:BcAuthorizeInput,body:BodyBcAuthorize) {
-    const url = this.url + "v1_0/bc-authorize";
-    const { api_key, user_api,} = data;
-    const auth = await this.createAccessToken({
-      api_key,
-      user_api,
-    });
-    if (!auth) return null;
-    const headers = this.headers;
-    headers["X-Callback-Url"] = this.callback;
-    headers['Content-Type']='application/x-www-form-urlencoded'
-    headers["Authorization"] = "Bearer" + auth.access_token;
-    headers["X-Callback-Url"] = this.callback;
-    headers['Content-Type']='application/x-www-form-urlencoded'
-    try {
-      const response = await axios.post<PlayloadBcauthorizeResponse>(url,querystring.stringify(body.toObject()),{headers})
-      if(response.status ==200){
-        return response.data
-      }
-    } catch (error) {
-      
-    }
-    return null;
-  } 
-  async createOauth2Token(data:BcAuthorizeInput,body:BodyOauth2Token){
-    const url = this.url + "v1_0/oauth2/token";
-    const { api_key, user_api,} = data;
-    const auth = await this.createAccessToken({
-      api_key,
-      user_api,
-    });
-    if (!auth) return null;
-    const headers = this.headers;
-    headers['Content-Type']='application/x-www-form-urlencoded'
-    headers["Authorization"] = "Bearer" + auth.access_token;
-    headers['Content-Type']='application/x-www-form-urlencoded'
-    try {
-      const response =await axios.post<PlayloadOauth2>(url,querystring.stringify(body.toObject()),{headers})
-      if( response.status==200){
-        return response.data;
-      }
-    } catch (error) {
-      
-    }
-    return null;
-  }
-  async requestTopay(data: RequestToPayInput, body: BodyRequestTopayInput) {
-    const url = this.url + "/v1_0/requesttopay";
+  /*
+  
+  */
+  async requestToPay(data: RequestToPayInput, body: BodyRequestTopayInput) {
+    const url = "/v1_0/requesttopay";
     const { api_key, user_api, referenceId } = data;
     const auth = await this.createAccessToken({
       api_key,
@@ -119,25 +45,12 @@ export class Colloction {
     } catch (e) {}
     return null;
   }
-  async getBasicUserInfo(data: RequestGetUserInfoInput) {
-    const { user_api, api_key, accountHolderMSISDN } = data;
-    const url =
-      this.url +
-      `v1_0/accountholder/msisdn/${accountHolderMSISDN}/basicuserinfo`;
-    const auth = await this.createAccessToken({
-      api_key,
-      user_api,
-    });
-    if (!auth) return null;
-    const headers = this.headers;
-    headers["Authorization"] = "Bearer" + auth.access_token;
+  
 
-    try {
-      const response = await axios.get<PlayloadUserInfo>(url, { headers });
-      if(response.status==200) return response.data;
-    } catch (e) {}
-    return null;
-  }
+
+
+
+
   async requesttoPayDeliveryNotification(
     data: RequesttoPayDeliveryNotificationInput,
     body: BodyRequesttoPayDeliveryNotificationInput
@@ -145,7 +58,7 @@ export class Colloction {
     const { api_key, user_api, referenceId, language, notificationMessage } =
       data;
     const url =
-      this.url + `/v1_0/requesttopay/${referenceId}/deliverynotification`;
+       `/v1_0/requesttopay/${referenceId}/deliverynotification`;
     const auth = await this.createAccessToken({
       api_key,
       user_api,
@@ -164,28 +77,16 @@ export class Colloction {
     } catch (e) {}
     return null;
   }
-  async getAccountBalance(data: RequestGetAccountBalanceInput) {
-    const { api_key, user_api, currency } = data;
-    const url = currency
-      ? this.url + `/v1_0/account/balance/${currency}`
-      : this.url + `/v1_0/account/balance`;
-    const auth = await this.createAccessToken({
-      api_key,
-      user_api,
-    });
-    if (!auth) return null;
-    const headers = this.headers;
-    headers["Authorization"] = "Bearer" + auth.access_token;
-    try {
-      const response = await axios.get(url, { headers });
-      if (response.status == 200) {
-        return response.data;
-      }
-    } catch (e) {}
-    return null;
-  }
+ 
+
+
+
+
+
+
+
   async createInvoiceStatus(data:RequestToPayInput,body:BodyInvoiceInput) {
-    const url = this.url +'v2_0/invoice';
+    const url = 'v2_0/invoice';
     const { referenceId, user_api, api_key } = data;
     const token = await this.createAccessToken({
       user_api,
@@ -206,9 +107,15 @@ export class Colloction {
     return false;
     
   }
+
+
+
+
+
+
   async getInvoiceStatus(data:RequestToPayInput) {
     const { referenceId, user_api, api_key } = data;
-    const url = this.url +`v2_0/invoice/${referenceId}`;
+    const url = `v2_0/invoice/${referenceId}`;
     const token = await this.createAccessToken({
       user_api,
       api_key,
@@ -226,16 +133,21 @@ export class Colloction {
     }
     return null;
   }
+
+
+
+
+
   async cancelInvoice(data:RequestToPayInput,body:{externalId:string}){
     const { referenceId, user_api, api_key } = data;
-    const url = this.url +`v2_0/invoice/${referenceId}`;
-    const token = await this.createAccessToken({
+    const url = `v2_0/invoice/${referenceId}`;
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
+    if (!authPlayload) return null;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] = this.setToken(authPlayload.access_token);
     try {
       const response = await axios.delete(url,{headers});
       if(response.status==200){
@@ -246,16 +158,21 @@ export class Colloction {
     }
     return null;
   }
+
+
+
+
+
   async preApproval(data:RequestToPayInput,body:BodyPreApproval){
     const {api_key,user_api,referenceId} = data;
-    const url = this.url +`v2_0/preapproval`;
-    const token = await this.createAccessToken({
+    const url = `v2_0/preapproval`;
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
+    if (!authPlayload) return null;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] =  this.setToken(authPlayload.access_token);
     headers["X-Reference-Id"] = referenceId;
     headers['X-Callback-Url'] = this.callback;
     try {
@@ -267,17 +184,22 @@ export class Colloction {
     return false
 
   }
-  
+
+
+
+
+
+
   async getPaymentStatus(data:RequestToPayInput) {
     const {api_key,user_api,referenceId} = data;
-    const url = this.url +`v2_0/payment/${referenceId}`;
-    const token = await this.createAccessToken({
+    const url = `v2_0/payment/${referenceId}`;
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
+    if (!authPlayload) return null;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] = this.setToken(authPlayload.access_token);
     headers['X-Callback-Url'] = this.callback;
 
     try {
@@ -288,17 +210,22 @@ export class Colloction {
     }
     return null
   }
+
+
+
+
+
+
   async getPreApprovalStatus(data:RequestToPayInput) {
     const {api_key,user_api,referenceId} = data;
-    const url = this.url +`v2_0/preapproval/${referenceId}`;
-    const token = await this.createAccessToken({
+    const url = `v2_0/preapproval/${referenceId}`;
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
+    if (!authPlayload) return null;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
-    
+    headers["Authorization"] = this.setToken(authPlayload.access_token);
     headers['X-Callback-Url'] = this.callback;
     try {
       const response = await axios.get<PreApprovalResult>(url,{headers});
@@ -308,13 +235,20 @@ export class Colloction {
     }
     return null;
   }
+
+
+
+
+
+
+
   async getUserInfoWithConsent(data:{
     Authorization:string,
   }) {
     const {Authorization}=data;
-    const url = this.url + "oauth2/v1_0/userinfo";
+    const url =  "oauth2/v1_0/userinfo";
     const headers = this.headers;
-    headers["Authorization"] = "Bearer" + Authorization;
+    headers["Authorization"] = this.setToken(Authorization);
     try {
       const response = await axios.get<PlayloadUserinfoWithConsent>(url,{headers})
       if(response.status==200){
@@ -326,20 +260,27 @@ export class Colloction {
     return null
     // PlayloadUserinfoWithConsent
   }
+
+
+
+
+
+
+
   async requestToWithdraw(
     data: RequestToPayInput,
     body: BodyRequestTopayInput
   ) {
     const { referenceId, user_api, api_key, version } = data;
     const version_r = version ? version : "v1_0";
-    const token = await this.createAccessToken({
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
-    const url = `${this.url}/${version_r}/requesttowithdraw`;
+    if (!authPlayload) return null;
+    const url = `${version_r}/requesttowithdraw`;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] =this.setToken(authPlayload.access_token);
     try {
       const response = await axios.post<PlayloadRequestToPayResult>(
         `${url}/${referenceId}`,
@@ -356,41 +297,24 @@ export class Colloction {
     }
     return false;
   }
+
+
+
+
+
+
+
+
   async requesttoPayTransactionStatus(data: RequestToPayInput) {
     const { referenceId, user_api, api_key } = data;
-    const token = await this.createAccessToken({
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
-    const url = `${this.url}/requesttopay`;
+    if (!authPlayload) return null;
+    const url = `requesttopay`;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
-    try {
-      const response = await axios.get<PlayloadRequestToPayResult>(
-        `${url}/${referenceId}`,
-        {
-          headers,
-        }
-      );
-      if (response.status == 200) {
-        return response.data;
-      }
-    } catch (e) {
-      return false;
-    }
-    return null;
-  }
-  async requestToWithdrawTransactionStatus(data: RequestToPayInput) {
-    const { referenceId, user_api, api_key } = data;
-    const token = await this.createAccessToken({
-      user_api,
-      api_key,
-    });
-    if (!token) return null;
-    const url = `${this.url}/requesttowithdraw`;
-    const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] = this.setToken(authPlayload.access_token);
     try {
       const response = await axios.get<PlayloadRequestToPayResult>(
         `${url}/${referenceId}`,
@@ -407,25 +331,36 @@ export class Colloction {
     return null;
   }
 
-  async validateAccountHolderStatus(data: ValidateAccountHolderStatusInput) {
-    const { accountHolderId, accountHolderIdType, user_api, api_key } = data;
-    const token = await this.createAccessToken({
+
+
+
+
+  
+  async requestToWithdrawTransactionStatus(data: RequestToPayInput) {
+    const { referenceId, user_api, api_key } = data;
+    const authPlayload = await this.createAccessToken({
       user_api,
       api_key,
     });
-    if (!token) return null;
-    const url = `${this.url}/active`;
+    if (!authPlayload) return null;
+    const url = `requesttowithdraw`;
     const headers = this.headers;
-    headers["Authorization"] = "Bearer " + token.access_token;
+    headers["Authorization"] =  this.setToken(authPlayload.access_token);
     try {
-      const response = await axios.get(
-        `${url}/${accountHolderIdType}/${accountHolderId}`,
+      const response = await axios.get<PlayloadRequestToPayResult>(
+        `${url}/${referenceId}`,
         {
           headers,
         }
       );
+      if (response.status == 200) {
+        return response.data;
+      }
     } catch (e) {
       return false;
     }
+    return null;
   }
+
+  
 }
