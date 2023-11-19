@@ -1,21 +1,29 @@
-import axios from "axios";
+import axios,{AxiosInstance} from "axios";
 
 import { v4 as UuidV4 } from "uuid";
 
 export class ProvioningController {
+  headers = {};
   referenceId: string;
+  axiosInstance:AxiosInstance 
   constructor(private pimarykey: string, private providerCallbackHost: string) {
     this.referenceId = this.generateRefence();
+    this.headers = {
+      "Ocp-Apim-Subscription-Key": this.pimarykey,
+      "X-Target-Environment": "sandbox",
+    }
+    this.axiosInstance = axios.create({
+      baseURL:'https://sandbox.momodeveloper.mtn.com/v1_0/apiuser',
+      headers:this.headers
+    })
   }
   generateRefence() {
     return UuidV4();
   }
 
   async createUserId() {
-    const url = "https://sandbox.momodeveloper.mtn.com/v1_0/apiuser/";
     const headers = {
-        "Ocp-Apim-Subscription-Key": this.pimarykey,
-        "X-Target-Environment": "sandbox",
+       ...this.headers,
         "X-Reference-Id": this.referenceId,
       },
       body = {
@@ -23,16 +31,11 @@ export class ProvioningController {
       };
 
     try {
-      const reponse = await axios.post(
-        "https://sandbox.momodeveloper.mtn.com/v1_0/apiuser",
+      const reponse = await this.axiosInstance.post(
+        '',
         body,
         {
-          headers: {
-            Accept: "application/json",
-            "X-Target-Environment": "sandbox",
-            "X-Reference-Id": this.referenceId,
-            "Ocp-Apim-Subscription-Key": this.pimarykey,
-          },
+          headers
         }
       );
       if (reponse.status == 201) {
@@ -55,7 +58,7 @@ export class ProvioningController {
 
   }
   async createApikey() {
-    const url = `https://sandbox.momodeveloper.mtn.com/v1_0/apiuser/${this.referenceId}/apikey`;
+    const url = `/${this.referenceId}/apikey`;
     const option = {
       headers: {
         "Content-Type": "application/json",
@@ -64,7 +67,7 @@ export class ProvioningController {
       },
     };
     try {
-      const response = await axios.post<{
+      const response = await this.axiosInstance.post<{
         apiKey: string;
       }>(url, {}, option);
       if (response.status == 201) {

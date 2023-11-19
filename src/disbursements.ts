@@ -8,7 +8,7 @@ export class Distribution extends BaseService2 {
     L'opération de dépôt est utilisée pour déposer un montant du compte 
     du propriétaire vers un compte du bénéficiaire.
     Le statut de la transaction peut être validé en utilisant 
-    le GET /deposit/{referenceId}
+    le GET /deposit/{referenceId }
     */
    async createDepot(data:RequestToDepotInput,body:BodyRequestToDepotInput){
     const {referenceId,user_api,api_key,callback,version} =data;

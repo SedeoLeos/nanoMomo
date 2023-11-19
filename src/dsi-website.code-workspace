@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../../../dsi-website"
+		},
+		{
+			"name": "nanoMomo",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"sqltools.connections": [
+			{
+				"previewLimit": 50,
+				"driver": "SQLite",
+				"database": "${workspaceFolder:dsi-website}/db.sqlite3",
+				"name": "dsi"
+			}
+		],
+		"sqltools.useNodeRuntime": true
+	}
+}

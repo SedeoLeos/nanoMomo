@@ -37,9 +37,9 @@ export class BaseService {
         const authorisation =this.setToken(token,'Basic')
         const headers = this.headers;
         headers["Authorization"] = authorisation;
+        console.log(authorisation)
         const response = await this.axiosInstance.post<PlayloadAccessToken>(`token/`,{},{ headers }
         );
-        console.log(response.data);
         if (response.status == 200) {
           return response.data;
         }
